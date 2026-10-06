@@ -58,4 +58,13 @@ DESKTOP_ENTRY
 chown "$TARGET_USER:$TARGET_GROUP" "$AUTOSTART_DIR/gbtv.desktop"
 chmod 0644 "$AUTOSTART_DIR/gbtv.desktop"
 
-echo "GBTV update 1.2 is installed. The display will stay awake during play, and GBTV will launch at desktop login. Restart the Pi to use it."
+if command -v systemd-run >/dev/null 2>&1; then
+  systemd-run --quiet --unit=gbtv-update-reboot --on-active=10s /usr/bin/systemctl reboot
+elif command -v shutdown >/dev/null 2>&1; then
+  shutdown -r +1 "GBTV update 1.2 complete"
+else
+  echo "GBTV update 1.2 is installed, but automatic reboot could not be scheduled." >&2
+  exit 1
+fi
+
+echo "GBTV update 1.2 is installed. The Pi will reboot shortly."
